@@ -1,6 +1,6 @@
 {
   "name": "@pavelkv94/microfi",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Microfrontend on iframes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "build": "tsc"
   },
   "author": "Pavelkv94",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "@types/react": "^18.3.7",
     "react": "^18.3.1",
@@ -24,5 +24,13 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pavelkv94/microfi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Pavelkv94/microfi/issues"
+  },
+  "homepage": "https://github.com/Pavelkv94/microfi#readme"
 }
