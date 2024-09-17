@@ -1,5 +1,5 @@
 
-``# Microfrontend Communication Library
+# Microfrontend Communication Library
 
 This library provides two React hooks, `useHostBus` and `useMicrofrontendBus`, to facilitate communication between a host application and microfrontend applications using iframes.
 
@@ -17,6 +17,8 @@ npm install @pavelkv94/microfi
 # or
 yarn add @pavelkv94/microfi`` 
 ```
+
+**For React, it is advisable to remove strict mode**
 
 ## `useHostBus`
 
