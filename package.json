@@ -1,6 +1,6 @@
 {
   "name": "@pavelkv94/microfi",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Microfrontend on iframes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,6 +10,23 @@
   "scripts": {
     "build": "tsc"
   },
+  "keywords": [
+    "microfrontend",
+    "communication",
+    "react",
+    "hooks",
+    "iframe",
+    "host",
+    "bus",
+    "message",
+    "postMessage",
+    "web",
+    "frontend",
+    "cross-origin",
+    "state management",
+    "npm",
+    "library"
+  ],
   "author": "Pavelkv94",
   "license": "Apache-2.0",
   "dependencies": {
