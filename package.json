@@ -1,5 +1,8 @@
 {
   "name": "@pavelkv94/microfi",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/Pavelkv94"
+  },
   "version": "0.0.7",
   "description": "Microfrontend on iframes",
   "main": "dist/index.js",
@@ -38,9 +41,6 @@
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
     "eslint": "^9.10.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
   },
   "repository": {
     "type": "git",
