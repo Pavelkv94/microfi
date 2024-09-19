@@ -12,11 +12,12 @@ This library provides two React hooks, `useHostBus` and `useMicrofrontendBus`, t
 
 To install the library, add it to your project via npm or yarn:
 
-```
-npm install @pavelkv94/microfi
-# or
-yarn add @pavelkv94/microfi`` 
-```
+`npm install @pavelkv94/microfi`
+
+**or**
+
+`yarn add @pavelkv94/microfi`
+
 
 **For React, it is advisable to remove strict mode**
 
@@ -30,92 +31,105 @@ yarn add @pavelkv94/microfi``
 
 1.  **Initialize the Hook**
     
-```
-    import { useHostBus } from "@pavelkv94/microfi";
+
+`import { useHostBus } from "@pavelkv94/microfi";`
     
-    const originsWhiteList = ["http://localhost:5001", "http://localhost:5002"];
-    const { sendToRemote, registerIframe } = useHostBus(originsWhiteList);` 
-   ```
+```
+const originsWhiteList = ["http://localhost:5001", "http://localhost:5002"];
+const { sendToRemote, registerIframe } = useHostBus(originsWhiteList);` 
+```
 2.  **Register Iframes**
     
     In the host app, you can register iframes and handle incoming messages using the `registerIframe` method.
     
 ```
-    `useEffect(() => {
-      const messageHandler = (event: MessageEvent) => {
-        if (originsWhiteList.includes(event.origin)) {
-          // Handle incoming messages from iframes
-          try {
-            const action: Action = JSON.parse(event.data);
-    
-            switch (action.type) {
-              case "IFRAME-LOADED":
-                registerIframe(event); // Register the iframe
-                break;
-              case "STATE-ACTION":
-                sendToRemote(action); // Send the action to all registered iframes
-                break;
-              default:
-                console.warn("Unhandled action type:", action.type);
-            }
-          } catch (error) {
-            console.error("Failed to handle message:", error);
+    useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      if (originsWhiteList.includes(event.origin)) {
+        // Handle incoming messages from iframes
+        try {
+          const action: Action = JSON.parse(event.data);
+
+          switch (action.type) {
+            case "IFRAME-LOADED":
+              registerIframe(event); // Register the iframe if it exist
+              break;
+
+            //handle incoming messages from remote microfrontend
+            case "CUSTOM_ACTION":
+              setDataFromRemote(action.payload.data); // process data from remote microfrontend
+              break;
+
+            default:
+              console.warn("Unhandled action type:", action.type);
           }
-        } else {
-          console.warn("Blocked message from untrusted origin:", event.origin);
+        } catch (error) {
+          console.error("Failed to handle message:", error);
         }
-      };
-    
-      window.addEventListener("message", messageHandler);
-    
-      return () => {
-        window.removeEventListener("message", messageHandler);
-      };
-    }, [registerIframe, sendToRemote]);` 
+      } else {
+        console.warn("Blocked message from untrusted origin:", event.origin);
+      }
+    };
+
+    window.addEventListener("message", messageHandler);
+
+    return () => {
+      window.removeEventListener("message", messageHandler);
+    };
+  }, [registerIframe, sendToRemote]);
    ```
 3.  **Send Actions to Iframes**
     
     You can use the `sendToRemote` method to send actions to all registered iframes.
 ```
     
-    `const sendToken = () => {
+    const sendToken = () => {
       const action: Action = {
         type: "TOKEN_CREATED",
         payload: { token: "XXX-YYYY" },
       };
     
       sendToRemote(action);
-    };` 
+    };
  ```  
 
 ### Example
 
 ```
-
-`import React, { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useHostBus } from "@pavelkv94/microfi";
 
+import "./App.css";
+import { useEffect, useState } from "react";
+
+interface Action {
+  type: string;
+  payload?: any;
+}
+
 function App() {
-  const [menu, setMenu] = useState<string[]>([]);
-  const originsWhiteList = ["http://localhost:5001", "http://localhost:5002"];
+  const originsWhiteList = ["http://localhost:5001", "http://localhost:5002"]; // trusted remote microfrontend addresses
   const { sendToRemote, registerIframe } = useHostBus(originsWhiteList);
+
+  const [dataFromRemote, setDataFromRemote] = useState(); // save data from remote microfrontend
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       if (originsWhiteList.includes(event.origin)) {
+        // Handle incoming messages from iframes
         try {
           const action: Action = JSON.parse(event.data);
 
           switch (action.type) {
-            case "MENU_SENT":
-              setMenu((prev) => [...prev, ...action.payload.menu]);
-              break;
             case "IFRAME-LOADED":
-              registerIframe(event); // Register the iframe
+              registerIframe(event); // Register the iframe if it exist
               break;
-            case "REDUX-ACTION":
-              sendToRemote(action); // Send the action to all registered iframes
+
+            //your custom action from remote microfrontend
+            case "CUSTOM_ACTION":
+              setDataFromRemote(action.payload.data); // process data from remote microfrontend
               break;
+
             default:
               console.warn("Unhandled action type:", action.type);
           }
@@ -134,22 +148,28 @@ function App() {
     };
   }, [registerIframe, sendToRemote]);
 
+  const sendToken = () => {
+    //custom action
+    const action: any = {
+      type: "TOKEN_CREATED",
+      payload: { token: "XXX-YYYY" },
+    };
+
+    sendToRemote(action); // Send the action to all registered iframes
+  };
+
   return (
-    <div className="App">
-      <h1>HOST APP</h1>
-      <ul>
-        {menu.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-      <button onClick={() => sendToken()}>Send Token to all microfronts</button>
-      <iframe src="http://localhost:5001/" style={{ width: "500px", height: "500px", border: "none", marginRight: "10px" }}></iframe>
-      <iframe src="http://localhost:5002/" style={{ width: "500px", height: "500px", border: "none" }}></iframe>
+    <div>
+      HOST APP
+      <p>Data from remote: {dataFromRemote}</p>
+      <button onClick={() => sendToken()}>Send Token all registered iframes</button>
+      <iframe src="http://localhost:5001/" style={{ width: "300px", height: "300px", border: "1px solid red" }}></iframe>
     </div>
   );
 }
 
-export default App;` 
+export default App;
+
 ```
 ## `useMicrofrontendBus`
 
@@ -160,67 +180,64 @@ export default App;`
 ### Usage
 
 1.  **Initialize the Hook**
-```
     
-    `import { useMicrofrontendBus } from "@pavelkv94/microfi";
+`import { useMicrofrontendBus } from "@pavelkv94/microfi";`
     
-    const { registerMeInHost, sendToHost, subscribe } = useMicrofrontendBus("http://localhost:5000");` 
-   ``` 
+`const { registerMeInHost, sendToHost, subscribe } = useMicrofrontendBus("http://localhost:5000");`
+
 2.  **Register the Iframe**
     
     Call `registerMeInHost` to notify the host that the iframe is loaded.
     
 ```
-    
-    `useEffect(() => {
-      registerMeInHost();
-    }, [registerMeInHost]);` 
- ```  
+useEffect(() => {
+  registerMeInHost();
+}, [registerMeInHost]); 
+```  
 3.  **Subscribe to Actions**
     
     Use the `subscribe` method to listen for specific actions from the host.
     
 ```
+useEffect(() => {
+  const unsubscribe = subscribe("TOKEN_CREATED", (action: Action) => {
+    console.log("Received token:", action.payload.token);
+  });
     
-    `useEffect(() => {
-      const unsubscribe = subscribe("TOKEN_CREATED", (action: Action) => {
-        console.log("Received token:", action.payload.token);
-      });
-    
-      return () => {
-        unsubscribe(); // Clean up subscription
-      };
-    }, [subscribe]);` 
-   ```
+  return () => {
+    unsubscribe(); // Clean up subscription
+  };
+}, [subscribe]); 
+```
 4.  **Send Actions to the Host**
     
     Use the `sendToHost` method to send actions to the host application.
     
 ```
+const notifyHost = () => {
+  const action: Action = {
+    type: "CUSTOM_ACTION",
+    payload: { data: "some data" },
+  };
     
-    `const notifyHost = () => {
-      const action: Action = {
-        type: "CUSTOM_ACTION",
-        payload: { data: "some data" },
-      };
-    
-      sendToHost(action);
-    };` 
+  sendToHost(action);
+};
 ```
 ### Example
 
 ```
-`import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMicrofrontendBus } from "@pavelkv94/microfi";
 
 function App() {
-  const [token, setToken] = useState<string | undefined>(undefined);
-  const { registerMeInHost, subscribe, sendToHost } = useMicrofrontendBus("http://localhost:5000");
+  const [token, setToken] = useState<string | undefined>(undefined); // process data from host
+
+  const { registerMeInHost, sendToHost, subscribe } = useMicrofrontendBus("http://localhost:5000"); //trusted host address
 
   useEffect(() => {
     registerMeInHost();
-
-    const unsubscribe = subscribe("TOKEN_CREATED", (action: Action) => {
+    // subscribe to action(events) from host
+    const unsubscribe = subscribe("TOKEN_CREATED", (action: any) => {
       setToken(action.payload.token);
     });
 
@@ -229,18 +246,24 @@ function App() {
     };
   }, [registerMeInHost, subscribe]);
 
+  const notifyHost = () => {
+    const action: any = {
+      type: "CUSTOM_ACTION",
+      payload: { data: "some data" },
+    };
+
+    sendToHost(action);
+  };
+
   return (
     <>
-      <h1>REMOTE APP</h1>
-      <p>Token is {token}</p>
-      <button onClick={() => sendToHost({ type: "REQUEST_TOKEN" })}>
-        Request Token from Host
-      </button>
+      <p>Token from host is {token}</p>
+      <button onClick={notifyHost}>notify Host</button>
     </>
   );
 }
 
-export default App;` 
+export default App; 
 ```
 ## Summary
 

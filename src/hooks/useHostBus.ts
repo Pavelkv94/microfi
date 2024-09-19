@@ -64,9 +64,6 @@ export const useHostBus = (originsWhiteList: string[]) => {
           case "IFRAME-LOADED":
             hostBusRef.current?.registerIframe(event); // Register the iframe
             break;
-          case "STATE-ACTION":
-            hostBusRef.current?.sendToRemote(action); // Send the action to all registered iframes
-            break;
           default:
             console.warn("Unhandled action type:", action.type);
         }
