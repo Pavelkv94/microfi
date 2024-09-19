@@ -97,8 +97,6 @@ const { sendToRemote, registerIframe } = useHostBus(originsWhiteList);`
 
 ```
 import { useHostBus } from "@pavelkv94/microfi";
-
-import "./App.css";
 import { useEffect, useState } from "react";
 
 interface Action {
