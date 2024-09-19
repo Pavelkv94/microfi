@@ -96,7 +96,6 @@ const { sendToRemote, registerIframe } = useHostBus(originsWhiteList);`
 ### Example
 
 ```
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useHostBus } from "@pavelkv94/microfi";
 
 import "./App.css";
@@ -150,7 +149,7 @@ function App() {
 
   const sendToken = () => {
     //custom action
-    const action: any = {
+    const action: Action = {
       type: "TOKEN_CREATED",
       payload: { token: "XXX-YYYY" },
     };
@@ -229,6 +228,11 @@ const notifyHost = () => {
 import React, { useEffect, useState } from "react";
 import { useMicrofrontendBus } from "@pavelkv94/microfi";
 
+interface Action {
+  type: string;
+  payload?: any;
+}
+
 function App() {
   const [token, setToken] = useState<string | undefined>(undefined); // process data from host
 
@@ -237,7 +241,7 @@ function App() {
   useEffect(() => {
     registerMeInHost();
     // subscribe to action(events) from host
-    const unsubscribe = subscribe("TOKEN_CREATED", (action: any) => {
+    const unsubscribe = subscribe("TOKEN_CREATED", (action: Action) => {
       setToken(action.payload.token);
     });
 
@@ -247,7 +251,7 @@ function App() {
   }, [registerMeInHost, subscribe]);
 
   const notifyHost = () => {
-    const action: any = {
+    const action: Action = {
       type: "CUSTOM_ACTION",
       payload: { data: "some data" },
     };
